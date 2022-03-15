@@ -9,6 +9,12 @@ public class Transaction {
     private List<UTXO> inUTXOs = new ArrayList<>();
     private List<UTXO> outUTXOs = new ArrayList<>();
 
+    private int confirmations;
+
+    public Transaction(int confirmations) {
+        this.confirmations = confirmations;
+    }
+
     public List<UTXO> getOutUTXOs() {
         return outUTXOs;
     }
@@ -23,6 +29,14 @@ public class Transaction {
 
     public void addOutUTXO(UTXO utxo) {
         outUTXOs.add(utxo);
+    }
+
+    public int getConfirmations() {
+        return confirmations;
+    }
+
+    public void setConfirmations(int confirmations) {
+        this.confirmations = confirmations;
     }
 
     @Override

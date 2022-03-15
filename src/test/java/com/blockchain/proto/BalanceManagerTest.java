@@ -20,7 +20,8 @@ public class BalanceManagerTest {
         System.out.println("Running test 1");
 
         Map<String, BigInteger[]> balanceMap = new HashMap<>();
-        balanceMap.put("abc", new BigInteger[] { new BigInteger("10"), new BigInteger("20") } );
+        balanceMap.put("abc", new BigInteger[] { new BigInteger("10"), new BigInteger("10") } );
+        balanceMap.put("def", new BigInteger[] { new BigInteger("0"), new BigInteger("0") } );
 
         Block block = new Block();
         Transaction tx = getTransaction1();
@@ -31,7 +32,8 @@ public class BalanceManagerTest {
         BalanceManager balanceManager = new BalanceManager(balanceMap);
         balanceManager.receiveBlock(block);
 
-        assertEquals(3, balanceMap.get("abc")[0].intValue());
+        assertEquals(3, balanceManager.getBalance("abc")[0].intValue());
+        assertEquals(7, balanceManager.getBalance("def")[0].intValue());
     }
 
     private Transaction getTransaction1() {
@@ -45,7 +47,7 @@ public class BalanceManagerTest {
     }
 
     private Transaction buildTransaction(String[] inAddresses, String[] outAddresses, int[] inputAmts, int[] outputAmts) {
-        Transaction tx = new Transaction();
+        Transaction tx = new Transaction(5);
 
         for (int i = 0; i < inAddresses.length; i++) {
             UTXO in = new UTXO(inAddresses[i], new BigInteger(String.valueOf(inputAmts[i])));

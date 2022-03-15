@@ -8,6 +8,7 @@ import java.util.Map;
 public class BalanceManager {
 
     private Map<String, BigInteger[]> balanceMap;
+    private final int CONFIRMATION_THRESHOLD = 3;
 
     public BalanceManager(Map<String, BigInteger[]> balanceMap) {
         this.balanceMap = balanceMap;
@@ -15,6 +16,10 @@ public class BalanceManager {
 
     public void receiveBlock(Block block) {
         for (Transaction tx : block.getTransactions()) {
+            if (tx.getConfirmations() < CONFIRMATION_THRESHOLD) {
+                //This transaction is not confirmed
+                continue;
+            }
             List<UTXO> inUTXOs = tx.getInUTXOs();
             List<UTXO> outUTXOs = tx.getOutUTXOs();
 
@@ -24,7 +29,6 @@ public class BalanceManager {
                     System.out.println("================================== Found in balance");
                     balances[0] = balances[0].subtract(inUTXO.getAmount());
                     //balances[1] = balances[1].add(inUTXO.getAmount());
-                    balanceMap.put(inUTXO.getAddress(), balances);
                 }
                 System.out.println("balanceMap = " + balanceMap);
             }
@@ -34,7 +38,6 @@ public class BalanceManager {
                     System.out.println("================================== Found out balance");
                     balances[0] = balances[0].add(outUTXO.getAmount());
                     //balances[1] = balances[1].subtract(outUTXO.getAmount());
-                    balanceMap.put(outUTXO.getAddress(), balances);
                 }
 
             }
@@ -42,6 +45,10 @@ public class BalanceManager {
     }
 
     public void receiveTransaction(Transaction tx) {
+        if (tx.getConfirmations() >= CONFIRMATION_THRESHOLD) {
+            //This transaction has already been confirmed
+            return;
+        }
         List<UTXO> inUTXOs = tx.getInUTXOs();
         List<UTXO> outUTXOs = tx.getInUTXOs();
 
@@ -59,7 +66,7 @@ public class BalanceManager {
         }
     }
 
-    private BigInteger[] getBalance(String address) {
+    public BigInteger[] getBalance(String address) {
         return balanceMap.get(address);
     }
 }
