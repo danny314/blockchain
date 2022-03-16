@@ -20,24 +20,7 @@ public class BalanceManager {
                 //This transaction is not confirmed
                 continue;
             }
-            List<UTXO> inUTXOs = tx.getInUTXOs();
-            List<UTXO> outUTXOs = tx.getOutUTXOs();
-
-            for (UTXO inUTXO: inUTXOs) {
-                BigInteger[] balances = balanceMap.get(inUTXO.getAddress());
-                if (balances != null) {
-                    System.out.println("================================== Found in balance");
-                    balances[0] = balances[0].subtract(inUTXO.getAmount());
-                }
-                System.out.println("balanceMap = " + balanceMap);
-            }
-            for (UTXO outUTXO: outUTXOs) {
-                BigInteger[] balances = balanceMap.get(outUTXO.getAddress());
-                if (balances != null) {
-                    System.out.println("================================== Found out balance");
-                    balances[0] = balances[0].add(outUTXO.getAmount());
-                }
-            }
+            processTransaction(tx, true);
         }
     }
 
@@ -47,22 +30,29 @@ public class BalanceManager {
             System.out.println("WARN: receiveTransaction called with confirmed transaction");
             return;
         }
+        processTransaction(tx, false);
+    }
+
+    private void processTransaction(Transaction tx, boolean isFromBlock) {
         List<UTXO> inUTXOs = tx.getInUTXOs();
         List<UTXO> outUTXOs = tx.getOutUTXOs();
+
+        int balanceIdx = isFromBlock ? 0 : 1;
 
         for (UTXO inUTXO: inUTXOs) {
             BigInteger[] balances = balanceMap.get(inUTXO.getAddress());
             if (balances != null) {
-                balances[1] = balances[1].subtract(inUTXO.getAmount());
+                balances[balanceIdx] = balances[balanceIdx].subtract(inUTXO.getAmount());
             }
         }
         for (UTXO outUTXO: outUTXOs) {
             BigInteger[] balances = balanceMap.get(outUTXO.getAddress());
             if (balances != null) {
-                balances[1] = balances[1].add(outUTXO.getAmount());
+                balances[balanceIdx] = balances[balanceIdx].add(outUTXO.getAmount());
             }
         }
     }
+
 
     public BigInteger[] getBalance(String address) {
         return balanceMap.get(address);
